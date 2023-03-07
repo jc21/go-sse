@@ -1,7 +1,9 @@
 package sse
 
 import (
+	"fmt"
 	"sync"
+	"time"
 )
 
 // Channel represents a server sent events channel.
@@ -29,7 +31,11 @@ func (c *Channel) SendMessage(message *Message) {
 
 	for c, open := range c.clients {
 		if open {
-			c.send <- message
+			select {
+			case c.send <- message:
+			case <-time.After(2000 * time.Millisecond):
+				fmt.Println("timed out sending message to client")
+			}
 		}
 	}
 

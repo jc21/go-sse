@@ -1,6 +1,7 @@
 package sse
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -91,7 +92,11 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 
 		for msg := range c.send {
 			msg.retry = s.options.RetryInterval
-			response.Write(msg.Bytes())
+			_, err := response.Write(msg.Bytes())
+			if err != nil {
+				fmt.Printf("failed to write to sse channel: %s\n", err.Error())
+				return
+			}
 			flusher.Flush()
 		}
 	} else if request.Method != "OPTIONS" {
