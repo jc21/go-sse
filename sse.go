@@ -66,6 +66,14 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 		h.Set("Connection", "keep-alive")
 		h.Set("X-Accel-Buffering", "no")
 
+		if s.options.OnConnectFunc != nil {
+			if statusCode, err := s.options.OnConnectFunc(request); err != nil {
+				s.options.Logger.Warn("SEE OnConnect err:", err.Error())
+				response.WriteHeader(statusCode)
+				return
+			}
+		}
+
 		var channelName string
 
 		if s.options.ChannelNameFunc == nil {
