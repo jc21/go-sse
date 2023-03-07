@@ -4,12 +4,6 @@ import (
 	"net/http"
 )
 
-// Logger Interface with all necessary functions to log.
-type LogPrinter interface {
-	Print(v ...any)
-	Printf(format string, v ...any)
-}
-
 // Options holds server configurations.
 type Options struct {
 	// RetryInterval change EventSource default retry interval (milliseconds).

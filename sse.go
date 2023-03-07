@@ -1,11 +1,7 @@
 package sse
 
 import (
-	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
 	"sync"
 )
 
@@ -22,14 +18,15 @@ type Server struct {
 
 // NewServer creates a new SSE server.
 func NewServer(options *Options) *Server {
+	defaultLogger := NewDefaultLogger()
 	if options == nil {
 		options = &Options{
-			Logger: log.New(os.Stdout, "go-sse: ", log.LstdFlags),
+			Logger: &defaultLogger,
 		}
 	}
 
 	if options.Logger == nil {
-		options.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
+		options.Logger = &defaultLogger
 	}
 
 	s := &Server{
@@ -94,7 +91,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 			msg.retry = s.options.RetryInterval
 			_, err := response.Write(msg.Bytes())
 			if err != nil {
-				fmt.Printf("failed to write to sse channel: %s\n", err.Error())
+				s.options.Logger.Error("SSEChannelWriteError", err)
 				return
 			}
 			flusher.Flush()
@@ -108,7 +105,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 // If channelName is an empty string, it will broadcast the message to all channels.
 func (s *Server) SendMessage(channelName string, message *Message) {
 	if len(channelName) == 0 {
-		s.options.Logger.Print("broadcasting message to all channels.")
+		s.options.Logger.Debug("SSE Broadcasting message to all channels")
 
 		s.mu.RLock()
 
@@ -119,15 +116,15 @@ func (s *Server) SendMessage(channelName string, message *Message) {
 		s.mu.RUnlock()
 	} else if ch, ok := s.getChannel(channelName); ok {
 		ch.SendMessage(message)
-		s.options.Logger.Printf("message sent to channel '%s'.", channelName)
+		s.options.Logger.Debug("SSE Message sent to channel '%s'", channelName)
 	} else {
-		s.options.Logger.Printf("message not sent because channel '%s' has no clients.", channelName)
+		s.options.Logger.Debug("SSE Message not sent because channel '%s' has no clients", channelName)
 	}
 }
 
 // Restart closes all channels and clients and allow new connections.
 func (s *Server) Restart() {
-	s.options.Logger.Print("restarting server.")
+	s.options.Logger.Info("SSE Restarting server")
 	s.close()
 }
 
@@ -183,13 +180,13 @@ func (s *Server) CloseChannel(name string) {
 }
 
 func (s *Server) addChannel(name string) *Channel {
-	ch := newChannel(name)
+	ch := newChannel(name, s.options.Logger)
 
 	s.mu.Lock()
 	s.channels[ch.name] = ch
 	s.mu.Unlock()
 
-	s.options.Logger.Printf("channel '%s' created.", ch.name)
+	s.options.Logger.Info("SSE Channel '%s' created", ch.name)
 
 	return ch
 }
@@ -201,7 +198,7 @@ func (s *Server) removeChannel(ch *Channel) {
 
 	ch.Close()
 
-	s.options.Logger.Printf("channel '%s' closed.", ch.name)
+	s.options.Logger.Info("SSE Channel '%s' closed", ch.name)
 }
 
 func (s *Server) getChannel(name string) (*Channel, bool) {
@@ -218,7 +215,7 @@ func (s *Server) close() {
 }
 
 func (s *Server) dispatch() {
-	s.options.Logger.Print("server started.")
+	s.options.Logger.Info("SSE Server started")
 
 	for {
 		select {
@@ -232,16 +229,16 @@ func (s *Server) dispatch() {
 			}
 
 			ch.addClient(c)
-			s.options.Logger.Printf("new client connected to channel '%s'.", ch.name)
+			s.options.Logger.Debug("SSE New client connected to channel '%s'", ch.name)
 
 		// Client disconnected.
 		case c := <-s.removeClient:
 			if ch, exists := s.getChannel(c.channel); exists {
 				ch.removeClient(c)
-				s.options.Logger.Printf("client disconnected from channel '%s'.", ch.name)
+				s.options.Logger.Debug("SSE Client disconnected from channel '%s'", ch.name)
 
 				if ch.ClientCount() == 0 {
-					s.options.Logger.Printf("channel '%s' has no clients.", ch.name)
+					s.options.Logger.Debug("SSE Channel '%s' has no clients", ch.name)
 					s.removeChannel(ch)
 				}
 			}
@@ -251,7 +248,7 @@ func (s *Server) dispatch() {
 			if ch, exists := s.getChannel(channel); exists {
 				s.removeChannel(ch)
 			} else {
-				s.options.Logger.Printf("requested to close nonexistent channel '%s'.", channel)
+				s.options.Logger.Debug("SSE Requested to close nonexistent channel '%s'", channel)
 			}
 
 		// Event Source shutdown.
@@ -262,7 +259,7 @@ func (s *Server) dispatch() {
 			close(s.closeChannel)
 			close(s.shutdown)
 
-			s.options.Logger.Print("server stopped.")
+			s.options.Logger.Info("SSE Server stopped")
 			return
 		}
 	}

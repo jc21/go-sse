@@ -1,7 +1,6 @@
 package sse
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
@@ -12,14 +11,16 @@ type Channel struct {
 	lastEventID string
 	name        string
 	clients     map[*Client]bool
+	logger      LogPrinter
 }
 
-func newChannel(name string) *Channel {
+func newChannel(name string, logger LogPrinter) *Channel {
 	return &Channel{
-		sync.RWMutex{},
-		"",
-		name,
-		make(map[*Client]bool),
+		mu:          sync.RWMutex{},
+		lastEventID: "",
+		name:        name,
+		clients:     make(map[*Client]bool),
+		logger:      logger,
 	}
 }
 
@@ -29,12 +30,13 @@ func (c *Channel) SendMessage(message *Message) {
 
 	c.mu.RLock()
 
-	for c, open := range c.clients {
+	for cl, open := range c.clients {
 		if open {
 			select {
-			case c.send <- message:
+			case cl.send <- message:
 			case <-time.After(2000 * time.Millisecond):
-				fmt.Println("timed out sending message to client")
+				// todo: logger.Warn
+				c.logger.Warn("SSE Timed out sending message to client")
 			}
 		}
 	}

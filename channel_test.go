@@ -15,7 +15,8 @@ func readMsg(c *Client) {
 }
 
 func TestSendMessage(t *testing.T) {
-	ch := newChannel("channel")
+	defaultLogger := NewDefaultLogger()
+	ch := newChannel("channel", &defaultLogger)
 	defer ch.Close()
 
 	wg := sync.WaitGroup{}

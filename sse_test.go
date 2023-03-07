@@ -2,8 +2,6 @@ package sse
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"sync"
 	"testing"
 )
@@ -34,9 +32,7 @@ func TestServer(t *testing.T) {
 	clientCount := 5
 	messageCount := 0
 
-	srv := NewServer(&Options{
-		Logger: log.New(os.Stdout, "go-sse: ", log.Ldate|log.Ltime|log.Lshortfile),
-	})
+	srv := NewServer(nil)
 
 	defer srv.Shutdown()
 
