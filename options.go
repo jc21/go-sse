@@ -15,9 +15,6 @@ type Options struct {
 	ChannelNameFunc func(*http.Request) string
 	// All usage logs end up in Logger
 	Logger LogPrinter
-	// Allows to specify a function to handle the request and optionally return an error
-	// if you don't want the connection to succeed
-	OnConnectFunc func(*http.Request) (int, error)
 }
 
 func (opt *Options) hasHeaders() bool {
