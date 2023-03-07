@@ -1,9 +1,14 @@
 package sse
 
 import (
-	"log"
 	"net/http"
 )
+
+// Logger Interface with all necessary functions to log.
+type LogPrinter interface {
+	Print(v ...any)
+	Printf(format string, v ...any)
+}
 
 // Options holds server configurations.
 type Options struct {
@@ -15,7 +20,7 @@ type Options struct {
 	// Default channel name is the request path.
 	ChannelNameFunc func(*http.Request) string
 	// All usage logs end up in Logger
-	Logger *log.Logger
+	Logger LogPrinter
 }
 
 func (opt *Options) hasHeaders() bool {
