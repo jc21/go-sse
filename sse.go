@@ -186,7 +186,7 @@ func (s *Server) addChannel(name string) *Channel {
 	s.channels[ch.name] = ch
 	s.mu.Unlock()
 
-	s.options.Logger.Info("SSE Channel '%s' created", ch.name)
+	s.options.Logger.Debug("SSE Channel '%s' created", ch.name)
 
 	return ch
 }
@@ -198,7 +198,7 @@ func (s *Server) removeChannel(ch *Channel) {
 
 	ch.Close()
 
-	s.options.Logger.Info("SSE Channel '%s' closed", ch.name)
+	s.options.Logger.Debug("SSE Channel '%s' closed", ch.name)
 }
 
 func (s *Server) getChannel(name string) (*Channel, bool) {
