@@ -1,14 +1,14 @@
 // Package sse implements Server-Sent Events that supports multiple channels.
 //
-// Server-sent events is a method of continuously sending data from a server to the browser, rather than repeatedly requesting it.
+// Server-sent events is a method of continuously sending data from a
+// server to the browser, rather than repeatedly requesting it.
 //
-// Examples
+// # Examples
 //
 // Basic usage of sse package.
 //
-//    s := sse.NewServer(nil)
-//    defer s.Shutdown()
+//	s := sse.NewServer(nil)
+//	defer s.Shutdown()
 //
-//    http.Handle("/events/", s)
-//
+//	http.Handle("/events/", s)
 package sse

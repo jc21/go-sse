@@ -46,7 +46,7 @@ func (m *Message) Buffer() *bytes.Buffer {
 	}
 
 	if len(m.data) > 0 {
-		buffer.WriteString(fmt.Sprintf("data: %s\n", strings.Replace(m.data, "\n", "\ndata: ", -1)))
+		buffer.WriteString(fmt.Sprintf("data: %s\n", strings.ReplaceAll(m.data, "\n", "\ndata: ")))
 	}
 
 	buffer.WriteString("\n")

@@ -6,14 +6,6 @@ import (
 	"testing"
 )
 
-func unused(i interface{}) {}
-
-func readMsg(c *Client) {
-	for msg := range c.send {
-		unused(msg)
-	}
-}
-
 func TestSendMessage(t *testing.T) {
 	defaultLogger := NewDefaultLogger()
 	ch := newChannel("channel", &defaultLogger)
@@ -54,6 +46,7 @@ func TestSendMessage(t *testing.T) {
 
 	ch.removeClient(c)
 
+	// nolint
 	if 100 != <-msgCount {
 		t.Fatal("Wrong message count.")
 	}

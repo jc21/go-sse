@@ -11,21 +11,21 @@ type mockResponseWriter struct {
 	c chan bool
 }
 
-func (m *mockResponseWriter) Header() (h http.Header) {
+func (*mockResponseWriter) Header() (h http.Header) {
 	return http.Header{}
 }
 
-func (m *mockResponseWriter) Write(p []byte) (n int, err error) {
+func (*mockResponseWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func (m *mockResponseWriter) WriteString(s string) (n int, err error) {
+func (*mockResponseWriter) WriteString(s string) (n int, err error) {
 	return len(s), nil
 }
 
-func (m *mockResponseWriter) WriteHeader(int) {}
+func (*mockResponseWriter) WriteHeader(int) {}
 
-func (m *mockResponseWriter) Flush() {}
+func (*mockResponseWriter) Flush() {}
 
 func (m *mockResponseWriter) CloseNotify() <-chan bool {
 	return m.c
@@ -82,12 +82,7 @@ func BenchmarkSendMessage(b *testing.B) {
 			go func() {
 				c := newClient("", name)
 				ch.addClient(c)
-
 				wgReg.Done()
-
-				for range c.send {
-				}
-
 				wgCh.Done()
 			}()
 		}

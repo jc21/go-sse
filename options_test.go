@@ -5,15 +5,13 @@ import "testing"
 func TestHasHeadersEmpty(t *testing.T) {
 	opt := Options{}
 
-	if opt.hasHeaders() == true {
+	if opt.hasHeaders() {
 		t.Fatal("There are headers.")
 	}
 }
 
 func TestHasHeadersNotEmpty(t *testing.T) {
-	opt := Options{}
-
-	opt = Options{
+	opt := Options{
 		Headers: map[string]string{
 			"Access-Control-Allow-Origin":  "*",
 			"Access-Control-Allow-Methods": "GET, OPTIONS",
@@ -21,7 +19,7 @@ func TestHasHeadersNotEmpty(t *testing.T) {
 		},
 	}
 
-	if opt.hasHeaders() == false {
+	if !opt.hasHeaders() {
 		t.Fatal("There are no headers.")
 	}
 }

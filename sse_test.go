@@ -40,7 +40,7 @@ func TestServer(t *testing.T) {
 	for n := 0; n < channelCount; n++ {
 		name := fmt.Sprintf("CH-%d", n+1)
 		srv.addChannel(name)
-		fmt.Printf("Channel %s registed\n", name)
+		fmt.Printf("Channel %s registered\n", name)
 	}
 
 	wg := sync.WaitGroup{}
@@ -57,7 +57,7 @@ func TestServer(t *testing.T) {
 			ch.addClient(c)
 
 			id := fmt.Sprintf("C-%d", n+1)
-			fmt.Printf("Client %s registed to channel %s\n", id, name)
+			fmt.Printf("Client %s registered to channel %s\n", id, name)
 
 			go func(id string) {
 				// Wait for messages in the channel

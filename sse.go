@@ -219,7 +219,6 @@ func (s *Server) dispatch() {
 
 	for {
 		select {
-
 		// New client connected.
 		case c := <-s.addClient:
 			ch, exists := s.getChannel(c.channel)
